@@ -7,6 +7,7 @@ from hurry.filesize import size
 from dotenv import load_dotenv
 from os import environ
 load_dotenv()
+
 intents = discord.Intents.default()
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
@@ -21,10 +22,12 @@ api_key = environ['API_KEY']
 sonarr = SonarrAPI(host_url, api_key)
 
 
-# Add the guild ids in which the slash command will appear. If it should be in all, remove the argument, but note that it will take some time (up to an hour) to register the command if it's for all guilds.
+with open("halo.json", 'w') as file:
+    dump(sonarr.lookup_series(term="Halo"), file, indent=2)
+
+
 @tree.command(name="queue", description="View Sonarr queue", guild=discord.Object(id=962644497928441916))
 async def first_command(interaction):
-    returnStr = ""
     queue = sonarr.get_queue(page_size=9)['records']
     emb = discord.Embed(title="Queue")
     for record in queue:
@@ -34,6 +37,20 @@ async def first_command(interaction):
 
         emb.add_field(
             name=f"{seriesTitle} - {episodeNum}", value=f"{size(record['sizeleft'])} - {record['timeleft']}")
+
+    await interaction.response.send_message(embed=emb, ephemeral=True, view=QueueView())
+
+
+@tree.command(name="shows", description="View Sonarr shows", guild=discord.Object(id=962644497928441916))
+async def first_command(interaction):
+    shows = sonarr.get_series()
+    emb = discord.Embed(title="Shows")
+    i = 0
+    for show in shows:
+        if i != 10 and show["seriesType"] == "standard":
+            print()
+            emb.add_field(name=show["title"], value=f"")
+            i += 1
 
     await interaction.response.send_message(embed=emb, ephemeral=True, view=QueueView())
 
