@@ -90,20 +90,6 @@ class NewView(discord.ui.View):
                               description=f"Select a quality to download {self.shows[self.i]['title']} in.")
         await interaction.response.edit_message(embed=embed, view=view)
 
-        # series = self.shows[self.i]
-        # quality = 6  # 720p/1080p
-        # match series['seriesType']:
-        #     case 'anime':
-        #         language = 2
-        #         rootDir = "E:\\Media\\Anime"
-        #     case _:
-        #         language = 1
-        #         rootDir = "E:\\Media\\TV Shows"
-        # self.current_wanted = len(self.sonarr.get_wanted())
-        # self.sonarr.add_series(
-        #     series=series, quality_profile_id=quality, language_profile_id=language, root_dir=rootDir, search_for_missing_episodes=True)
-        # await self.replaceShowEmbed(interaction=interaction, button=button)
-
     async def replaceShowEmbed(self, interaction: discord.Interaction, button: discord.ui.Button):
         if button.label == "Select Show":
             emb = discord.Embed(title="Added")
