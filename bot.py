@@ -2,7 +2,7 @@ from pyarr import SonarrAPI
 import discord
 from discord import app_commands
 from json import dump
-from queue_view import QueueView
+from button_views import QueueView, NewView
 from hurry.filesize import size
 from dotenv import load_dotenv
 from os import environ
@@ -22,12 +22,12 @@ api_key = environ['API_KEY']
 sonarr = SonarrAPI(host_url, api_key)
 
 
-with open("halo.json", 'w') as file:
-    dump(sonarr.lookup_series(term="Halo"), file, indent=2)
+# with open("halo.json", 'w') as file:
+#     dump(, file, indent=2)
 
 
 @tree.command(name="queue", description="View Sonarr queue", guild=discord.Object(id=962644497928441916))
-async def first_command(interaction):
+async def queue_command(interaction):
     queue = sonarr.get_queue(page_size=9)['records']
     emb = discord.Embed(title="Queue")
     for record in queue:
@@ -41,14 +41,34 @@ async def first_command(interaction):
     await interaction.response.send_message(embed=emb, ephemeral=True, view=QueueView())
 
 
+@tree.command(name="new", guild=discord.Object(id=962644497928441916))
+async def new_command(interaction, show_name: str):
+    """Add a new Sonarr show.
+
+    Parameters
+    -----------
+    show_name: str
+        The name of the show
+    """
+    shows = sonarr.lookup_series(term=show_name)
+    shows.insert(0, show_name)
+    emb = discord.Embed(title="Shows")
+    for image in shows[1]['images']:
+        if image['coverType'] == 'poster':
+            emb.set_image(url=image['remoteUrl'])
+    emb.add_field(
+        name=f"{shows[1]['title']} ({shows[1]['year']}) ({shows[1]['seriesType'].capitalize()})", value=shows[1]['overview'], inline=True)
+
+    await interaction.response.send_message(embed=emb, ephemeral=True, view=NewView(shows=shows, sonarr=sonarr, i=1))
+
+
 @tree.command(name="shows", description="View Sonarr shows", guild=discord.Object(id=962644497928441916))
-async def first_command(interaction):
+async def shows_command(interaction):
     shows = sonarr.get_series()
     emb = discord.Embed(title="Shows")
     i = 0
     for show in shows:
         if i != 10 and show["seriesType"] == "standard":
-            print()
             emb.add_field(name=show["title"], value=f"")
             i += 1
 
@@ -59,6 +79,7 @@ async def first_command(interaction):
 async def on_ready():
     if environ['GUILD_ID']:
         await tree.sync(guild=discord.Object(id=962644497928441916))
+
     print("Ready!")
 
 client.run(environ['TOKEN'])
