@@ -55,7 +55,7 @@ class SelectedView(discord.ui.View):
             language = 1
             rootDir = "E:\\Media\\TV Shows"
         self.sonarr.add_series(
-            series=self.show, quality_profile_id=self.info[0], language_profile_id=language, root_dir=rootDir, search_for_missing_episodes=True)
+            series=self.show, quality_profile_id=int(self.info[0]), language_profile_id=language, root_dir=rootDir, search_for_missing_episodes=True)
         emb = discord.Embed(
             title="Added", description=f"Added {self.show['title']}!")
         await interaction.response.edit_message(embed=emb, view=None)
