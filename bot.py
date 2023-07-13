@@ -1,11 +1,17 @@
-from pyarr import SonarrAPI
-import discord
-from discord import app_commands
-from json import dump
-from button_views import QueueView, NewView
-from hurry.filesize import size
-from dotenv import load_dotenv
-from os import environ
+import sys
+try:
+    from pyarr import SonarrAPI
+    import discord
+    from discord import app_commands
+    from json import dump
+    from button_views import QueueView, NewView
+    from hurry.filesize import size
+    from dotenv import load_dotenv
+    from os import environ
+except ImportError:
+    sys.exit("""You are missing modules.
+                Install them via pip install -r requirements.txt""")
+
 load_dotenv()
 
 intents = discord.Intents.default()
